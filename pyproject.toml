@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm_api_wrapper"
+name = "free-llm-api"
 version = "0.1.0"
-description = "Resilient router across free LLM API providers with failover, weighted scheduling, and hot-reloadable config."
+description = "FreeLLMAPI — Resilient router across free LLM API providers with failover, weighted scheduling, and hot-reloadable config."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -19,10 +19,10 @@ dev = ["pytest>=7.0"]
 
 [tool.setuptools]
 packages = [
-    "llm_api_wrapper",
-    "llm_api_wrapper.providers",
-    "llm_api_wrapper.utils",
+    "free_llm_api",
+    "free_llm_api.providers",
+    "free_llm_api.utils",
 ]
 
 [tool.setuptools.package-data]
-llm_api_wrapper = ["config.yaml"]
+free_llm_api = ["config.yaml"]

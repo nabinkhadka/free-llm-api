@@ -2,7 +2,7 @@
 
 Run it in the SAME shell where your API keys are exported:
 
-    python3 list_models.py
+    python3 tests/list_models.py
 
 For every OpenAI-compatible provider it calls GET {base_url}/models using the
 key from your environment, so you see the exact, current model IDs to put in
@@ -10,7 +10,7 @@ config.yaml. Use this whenever a provider returns "unknown model" / 404.
 """
 import requests
 
-from llm_api_wrapper.utils.config_loader import load_config
+from free_llm_api.utils.config_loader import load_config
 
 
 def main() -> None:

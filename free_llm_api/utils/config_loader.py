@@ -37,11 +37,11 @@ def _expand(value: Any) -> Any:
 
 
 def find_config(path: Optional[str] = None) -> str:
-    """Resolve a config path: explicit arg > $LLM_WRAPPER_CONFIG > CWD > packaged."""
+    """Resolve a config path: explicit arg > $FREE_LLM_API_CONFIG > CWD > packaged."""
     candidates = []
     if path:
         candidates.append(path)
-    env_path = os.environ.get("LLM_WRAPPER_CONFIG")
+    env_path = os.environ.get("FREE_LLM_API_CONFIG")
     if env_path:
         candidates.append(env_path)
     candidates.append(os.path.join(os.getcwd(), "config.yaml"))
@@ -52,7 +52,7 @@ def find_config(path: Optional[str] = None) -> str:
         if candidate and os.path.isfile(candidate):
             return candidate
     raise ConfigError(
-        "config.yaml not found. Set $LLM_WRAPPER_CONFIG or place config.yaml "
+        "config.yaml not found. Set $FREE_LLM_API_CONFIG or place config.yaml "
         "in the working directory."
     )
 

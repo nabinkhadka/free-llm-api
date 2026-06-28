@@ -1,4 +1,4 @@
-# llm_api_wrapper
+# free-llm-api / FreeLLMAPI
 
 A lightweight, **OpenRouter-style router for FREE LLM APIs**. It rotates across
 multiple free providers, fails over the instant one errors out, respects rate
@@ -6,7 +6,7 @@ limits with cooldowns, and is driven entirely by a `config.yaml` you can edit
 while it runs.
 
 ```python
-from llm_api_wrapper import endpoints
+from free_llm_api import endpoints
 
 response = endpoints.generate("Explain quantum computing")
 print(response["text"])
@@ -34,12 +34,11 @@ unreliable free tiers. Providers come from
 ### Included free providers
 
 `groq` · `openrouter` (`:free`) · `nvidia` · `mistral` · `zai` (Zhipu GLM) ·
-`cerebras` · `llm7` (key-less) · `gemini` (Google AI Studio) · `huggingface`
+`cerebras` · `llm7` (key-less) · `gemini` (Google AI Studio)
 
-All but HuggingFace are OpenAI-compatible, so they share **one** generic
-`type: openai` implementation and differ only by `base_url` in config — adding
-another such provider needs zero code. HuggingFace has its own `type` because
-its API is not OpenAI-shaped (proving the plugin layer is API-agnostic).
+All are OpenAI-compatible, so they share **one** generic `type: openai`
+implementation and differ only by `base_url` in config — adding another such
+provider needs zero code.
 
 ---
 
@@ -55,7 +54,7 @@ Requires Python 3.9+.
 
 ## Configure
 
-Edit `llm_api_wrapper/config.yaml` (or point `$LLM_WRAPPER_CONFIG` at your own),
+Edit `free_llm_api/config.yaml` (or point `$FREE_LLM_API_CONFIG` at your own),
 then export keys for the providers you have. Get free keys at:
 
 | Provider | Key env var | Sign-up |
@@ -68,7 +67,6 @@ then export keys for the providers you have. Get free keys at:
 | Z.AI (Zhipu) | `ZAI_API_KEY` | https://z.ai (API keys in console) |
 | NVIDIA | `NVIDIA_API_KEY` | https://build.nvidia.com |
 | LLM7.io | _(none — key-less)_ | https://llm7.io |
-| HuggingFace | `HF_API_KEY` | https://huggingface.co/settings/tokens |
 
 ```bash
 export GROQ_API_KEY=gsk_...
@@ -76,13 +74,13 @@ export OPENROUTER_API_KEY=sk-or-...
 # providers whose key is empty are skipped automatically — you don't need all of them
 ```
 
-Config resolution order: explicit path → `$LLM_WRAPPER_CONFIG` → `./config.yaml`
+Config resolution order: explicit path → `$FREE_LLM_API_CONFIG` → `./config.yaml`
 → the packaged default.
 
 ## Run
 
 ```bash
-python example.py          # end-to-end demo + provider stats
+python tests/example.py          # end-to-end demo + provider stats
 python tests/test_wrapper.py   # offline tests (no keys / network needed)
 ```
 
@@ -91,7 +89,7 @@ python tests/test_wrapper.py   # offline tests (no keys / network needed)
 ## Usage
 
 ```python
-from llm_api_wrapper import endpoints
+from free_llm_api import endpoints
 
 # basic
 r = endpoints.generate("Write a haiku about the sea")
@@ -154,7 +152,7 @@ block pointing the generic `openai` type at its base URL:
 "model"}`, and raises a `ProviderError` subclass on failure. Register it with
 `@register("yourname")` and reference it via `type: yourname`. It's
 auto-discovered on import — the manager and scheduler never need to know it
-exists. See `huggingface_provider.py` for a complete example.
+exists.
 
 ---
 
@@ -177,7 +175,7 @@ fixing a key) gives a previously disabled provider a fresh chance.
 ## Project layout
 
 ```
-llm_api_wrapper/
+free_llm_api/
 ├── config.yaml            # all providers + settings
 ├── endpoints.py           # public API: generate / stats / reload / configure
 ├── manager.py             # load, schedule, fail over, health tracking
@@ -186,8 +184,7 @@ llm_api_wrapper/
 ├── providers/
 │   ├── base.py            # BaseProvider + OpenAICompatibleProvider
 │   ├── registry.py        # @register plugin registry
-│   ├── openai_provider.py # ONE generic type for all OpenAI-compatible APIs
-│   └── huggingface_provider.py   # the only non-OpenAI-shaped provider
+│   └── openai_provider.py # ONE generic type for all OpenAI-compatible APIs
 └── utils/
     └── config_loader.py   # YAML + ${ENV} expansion + mtime for hot reload
 ```

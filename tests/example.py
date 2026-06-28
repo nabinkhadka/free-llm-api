@@ -1,7 +1,7 @@
 """Ask the same question several times and see which provider answered.
 
-    python3 example.py        # 10 calls
-    python3 example.py 20     # custom count
+    python3 tests/example.py        # 10 calls
+    python3 tests/example.py 20     # custom count
 
 Each call is routed by the weighted round-robin scheduler, so across several
 calls you'll see the providers rotate and can compare their answers.
@@ -10,7 +10,7 @@ import logging
 import sys
 import textwrap
 
-from llm_api_wrapper import endpoints
+from free_llm_api import endpoints
 
 # WARNING keeps output clean; failures still print. Set to INFO to trace routing.
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")

@@ -1,8 +1,8 @@
-"""llm_api_wrapper — resilient routing across FREE LLM API providers.
+"""free_llm_api — resilient routing across FREE LLM API providers.
 
 Quick start::
 
-    from llm_api_wrapper import endpoints
+    from free_llm_api import endpoints
     response = endpoints.generate("Explain quantum computing")
     print(response["text"])
 """

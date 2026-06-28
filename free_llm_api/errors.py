@@ -1,4 +1,4 @@
-"""Exception hierarchy for llm_api_wrapper.
+"""Exception hierarchy for free_llm_api.
 
 ``ProviderError`` and its subclasses are *recoverable*: the manager catches
 them and fails over to the next provider. Each carries failure-handling hints

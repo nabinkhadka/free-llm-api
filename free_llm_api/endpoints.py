@@ -2,11 +2,11 @@
 
 Usage::
 
-    from llm_api_wrapper import endpoints
+    from free_llm_api import endpoints
     response = endpoints.generate("Explain quantum computing")
     print(response["text"])
 
-A single process-wide :class:`~llm_api_wrapper.manager.Manager` is created
+A single process-wide :class:`~free_llm_api.manager.Manager` is created
 lazily on first use.
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ def generate(prompt: str, **kwargs: Any) -> Dict[str, Any]:
 
     Returns a normalized dict with at least ``text``, ``provider`` and
     ``model`` (plus ``latency``, ``usage`` and ``raw``).
-    Raises :class:`~llm_api_wrapper.errors.AllProvidersFailedError` if every
+    Raises :class:`~free_llm_api.errors.AllProvidersFailedError` if every
     provider fails.
 
     Common kwargs: ``model``, ``system``, ``max_tokens``, ``temperature``,
@@ -58,7 +58,7 @@ def stream_generate(prompt: str, **kwargs: Any) -> Generator[Dict[str, Any], Non
 
     Yields normalized chunk dicts (``text``, ``provider``, ``model``,
     ``finish_reason``).  The final chunk will have ``finish_reason="stop"``.
-    Raises :class:`~llm_api_wrapper.errors.AllProvidersFailedError` if every
+    Raises :class:`~free_llm_api.errors.AllProvidersFailedError` if every
     provider fails.
     """
     yield from _get_manager().stream_generate(prompt, **kwargs)

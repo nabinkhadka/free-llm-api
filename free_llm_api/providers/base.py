@@ -54,7 +54,7 @@ class BaseProvider:
         """Return a normalized response dict.
 
         Required keys in the returned dict: ``text``, ``provider``, ``model``.
-        Must raise a :class:`~llm_api_wrapper.errors.ProviderError` subclass on
+        Must raise a :class:`~free_llm_api.errors.ProviderError` subclass on
         failure so the manager can fail over.
         """
         raise NotImplementedError

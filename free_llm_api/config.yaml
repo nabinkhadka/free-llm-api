@@ -1,4 +1,4 @@
-# llm_api_wrapper configuration — FREE provider tiers only.
+# free_llm_api configuration — FREE provider tiers only.
 #
 # API keys use ${ENV_VAR} expansion, so you never commit secrets. Export the
 # matching variables (see README) before running. Providers whose key is empty
@@ -34,7 +34,7 @@ providers:
       base_url: "https://openrouter.ai/api/v1"
       headers:                                        # OpenRouter attribution
         HTTP-Referer: "https://github.com/your/repo"
-        X-Title: "llm_api_wrapper"
+        X-Title: "free_llm_api"
 
   - name: nvidia
     type: openai
@@ -93,16 +93,6 @@ providers:
     weight: 8
     extra:
       base_url: "https://generativelanguage.googleapis.com/v1beta/openai"
-
-  # HuggingFace serverless Inference API was RETIRED (api-inference.huggingface.co
-  # no longer resolves). Disabled. To use HF now, point a `type: openai` entry at
-  # the router: base_url "https://router.huggingface.co/v1".
-  - name: huggingface
-    type: huggingface
-    enabled: false
-    api_key: "${HF_API_KEY}"
-    model: "HuggingFaceH4/zephyr-7b-beta"
-    weight: 1
 
 settings:
   strategy: "weighted_round_robin"   # or "fastest" (lowest mean latency)

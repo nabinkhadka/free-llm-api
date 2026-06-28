@@ -2,11 +2,11 @@
 
 Run in the shell where your API keys are exported:
 
-    python3 try_models.py llm7                       # auto-tries LLM7's free-tier models
-    python3 try_models.py zai                         # tries built-in free-first candidates
-    python3 try_models.py zai glm-4.5-flash glm-4.6   # or pass your own list
-    python3 try_models.py cerebras
-    python3 try_models.py gemini
+    python3 tests/try_models.py llm7                       # auto-tries LLM7's free-tier models
+    python3 tests/try_models.py zai                         # tries built-in free-first candidates
+    python3 tests/try_models.py zai glm-4.5-flash glm-4.6   # or pass your own list
+    python3 tests/try_models.py cerebras
+    python3 tests/try_models.py gemini
 
 For each candidate it sends a tiny prompt and prints OK (+ snippet) or the exact
 error — so you can tell free vs paid/locked vs unknown-model. Put a working one
@@ -16,7 +16,7 @@ import sys
 
 import requests
 
-from llm_api_wrapper.utils.config_loader import load_config
+from free_llm_api.utils.config_loader import load_config
 
 # Free-first candidates per provider (override by passing models on the CLI).
 CANDIDATES = {
@@ -47,7 +47,7 @@ def candidates_for(name: str, entry: dict, base: str, cli_models: list) -> list:
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("usage: python3 try_models.py <provider-name> [model ...]")
+        print("usage: python3 tests/try_models.py <provider-name> [model ...]")
         return
     target, cli_models = sys.argv[1], sys.argv[2:]
 

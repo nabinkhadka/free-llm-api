@@ -10,12 +10,12 @@ import tempfile
 import time
 from collections import Counter
 
-from llm_api_wrapper.errors import AllProvidersFailedError
-from llm_api_wrapper.manager import Manager
-from llm_api_wrapper.providers.base import BaseProvider
-from llm_api_wrapper.providers.registry import register
-from llm_api_wrapper.scheduler import WeightedRoundRobin
-from llm_api_wrapper import errors
+from free_llm_api.errors import AllProvidersFailedError
+from free_llm_api.manager import Manager
+from free_llm_api.providers.base import BaseProvider
+from free_llm_api.providers.registry import register
+from free_llm_api.scheduler import WeightedRoundRobin
+from free_llm_api import errors
 
 
 # --- fake providers -------------------------------------------------------
