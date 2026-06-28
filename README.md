@@ -74,6 +74,26 @@ export OPENROUTER_API_KEY=sk-or-...
 # providers whose key is empty are skipped automatically — you don't need all of them
 ```
 
+### Override model & weight per provider
+
+Every provider's `model` and `weight` can be overridden at runtime via
+environment variables — no config file edits needed:
+
+```bash
+# Override model only
+GROQ_MODEL=llama-4 python3 tests/example.py
+
+# Override model + weight
+GROQ_MODEL=llama-4 GROQ_WEIGHT=20 python3 tests/example.py
+
+# Override multiple providers
+GROQ_WEIGHT=30 GEMINI_WEIGHT=1 python3 tests/example.py
+```
+
+The env var name follows the pattern `{NAME}_MODEL` / `{NAME}_WEIGHT`,
+where `NAME` is the uppercase provider name from `config.yaml`.
+If unset, the built-in default from `config.yaml` is used.
+
 Config resolution order: explicit path → `$FREE_LLM_API_CONFIG` → `./config.yaml`
 → the packaged default.
 
