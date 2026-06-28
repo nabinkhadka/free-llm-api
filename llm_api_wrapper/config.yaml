@@ -1,0 +1,110 @@
+# llm_api_wrapper configuration — FREE provider tiers only.
+#
+# API keys use ${ENV_VAR} expansion, so you never commit secrets. Export the
+# matching variables (see README) before running. Providers whose key is empty
+# are skipped automatically; set `enabled: false` to remove one explicitly.
+#
+# Nearly every provider is OpenAI-compatible, so they all share `type: openai`
+# and differ only by `extra.base_url`. To add another, copy a block and change
+# the URL + model — no Python needed. HuggingFace uses its own `type` because
+# its API is not OpenAI-shaped.
+#
+# `name`         : label for this entry (shown in logs / stats)
+# `type`         : registered implementation (`openai` or `huggingface`)
+# `weight`       : relative share of traffic under weighted_round_robin
+# `requires_key` : set false for key-less gateways (e.g. LLM7.io)
+
+providers:
+  - name: groq
+    type: openai
+    enabled: true
+    api_key: "${GROQ_API_KEY}"
+    model: "llama-3.3-70b-versatile"
+    weight: 10
+    extra:
+      base_url: "https://api.groq.com/openai/v1"
+
+  - name: openrouter
+    type: openai
+    enabled: true
+    api_key: "${OPENROUTER_API_KEY}"
+    model: "qwen/qwen3-coder"   # keep the :free suffix
+    weight: 6
+    extra:
+      base_url: "https://openrouter.ai/api/v1"
+      headers:                                        # OpenRouter attribution
+        HTTP-Referer: "https://github.com/your/repo"
+        X-Title: "llm_api_wrapper"
+
+  - name: nvidia
+    type: openai
+    enabled: true
+    api_key: "${NVIDIA_API_KEY}"
+    model: "meta/llama-3.1-8b-instruct"
+    weight: 10
+    extra:
+      base_url: "https://integrate.api.nvidia.com/v1"
+
+  - name: mistral
+    type: openai
+    enabled: true
+    api_key: "${MISTRAL_API_KEY}"
+    model: "mistral-small-latest"
+    weight: 6
+    extra:
+      base_url: "https://api.mistral.ai/v1"
+
+  - name: zai            # Z.AI / Zhipu — GLM models
+    type: openai
+    enabled: true
+    api_key: "${ZAI_API_KEY}"
+    model: "glm-4.5-flash"          # free tier (glm-4.6 etc. need a paid balance)
+    weight: 5
+    extra:
+      base_url: "https://api.z.ai/api/paas/v4"
+      params:
+        thinking:
+          type: disabled            # GLM defaults to deep-thinking -> empty `content`; disable it
+
+  - name: cerebras
+    type: openai
+    enabled: true
+    api_key: "${CEREBRAS_API_KEY}"
+    model: "gpt-oss-120b"
+    weight: 7
+    extra:
+      base_url: "https://api.cerebras.ai/v1"
+
+  - name: llm7           # free; token optional but raises rate limits
+    type: openai
+    enabled: true
+    requires_key: false             # works key-less; token used only if present
+    api_key: "${LLM7_API_KEY}"      # export LLM7_API_KEY to raise limits
+    model: "qwen3-235b"             # free tier (gpt-5.4-mini etc. are pay-per-token)
+    weight: 4
+    extra:
+      base_url: "https://api.llm7.io/v1"
+
+  - name: gemini         # Google AI Studio, OpenAI-compatible endpoint
+    type: openai
+    enabled: true
+    api_key: "${GEMINI_API_KEY}"
+    model: "gemini-2.5-flash"
+    weight: 8
+    extra:
+      base_url: "https://generativelanguage.googleapis.com/v1beta/openai"
+
+  # HuggingFace serverless Inference API was RETIRED (api-inference.huggingface.co
+  # no longer resolves). Disabled. To use HF now, point a `type: openai` entry at
+  # the router: base_url "https://router.huggingface.co/v1".
+  - name: huggingface
+    type: huggingface
+    enabled: false
+    api_key: "${HF_API_KEY}"
+    model: "HuggingFaceH4/zephyr-7b-beta"
+    weight: 1
+
+settings:
+  strategy: "weighted_round_robin"   # or "fastest" (lowest mean latency)
+  retry_on_failure: true             # fail over to the next provider on error
+  timeout: 120                       # per-request seconds (coding needs longer; overridable per provider)

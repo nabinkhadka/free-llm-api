@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm_api_wrapper"
+version = "0.1.0"
+description = "Resilient router across free LLM API providers with failover, weighted scheduling, and hot-reloadable config."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "requests>=2.28",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools]
+packages = [
+    "llm_api_wrapper",
+    "llm_api_wrapper.providers",
+    "llm_api_wrapper.utils",
+]
+
+[tool.setuptools.package-data]
+llm_api_wrapper = ["config.yaml"]
