@@ -16,6 +16,15 @@ from ..errors import ConfigError
 
 _ENV_PATTERN = re.compile(r"\$\{([^}]+)\}")
 
+# Load .env from CWD (if it exists) — OS env vars take precedence.
+# This lets users keep secrets in a .env file without exporting them manually.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
 
 def _expand(value: Any) -> Any:
     """Recursively expand ``${VAR}`` / ``${VAR:-default}`` in strings."""

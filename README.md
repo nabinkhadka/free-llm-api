@@ -55,7 +55,8 @@ Requires Python 3.9+.
 ## Configure
 
 Edit `free_llm_api/config.yaml` (or point `$FREE_LLM_API_CONFIG` at your own),
-then export keys for the providers you have. Get free keys at:
+then set keys for the providers you want. You can use a `.env` file (easiest)
+or export them as environment variables. Get free keys at:
 
 | Provider | Key env var | Sign-up |
 |---|---|---|
@@ -69,10 +70,18 @@ then export keys for the providers you have. Get free keys at:
 | LLM7.io | _(none — key-less)_ | https://llm7.io |
 
 ```bash
+# Option A — .env file (recommended)
+cp .env.example .env   # then edit .env with your keys
+
+# Option B — export manually
 export GROQ_API_KEY=gsk_...
 export OPENROUTER_API_KEY=sk-or-...
+
 # providers whose key is empty are skipped automatically — you don't need all of them
 ```
+
+**Variable priority:** OS environment variables > `.env` file > YAML defaults
+(`${VAR:-default}`). An existing OS env var always wins over `.env`.
 
 ### Override model & weight per provider
 
