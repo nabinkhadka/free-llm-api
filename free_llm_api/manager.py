@@ -334,3 +334,36 @@ class Manager:
                 }
                 for name, s in self._states.items()
             }
+
+    def status(self) -> Dict[str, Any]:
+        """Return a comprehensive snapshot: config settings + per-provider
+        config and runtime state."""
+        now = time.time()
+        with self._lock:
+            strategy = self._settings.get("strategy", "weighted_round_robin")
+            providers = {}
+            for name, s in self._states.items():
+                key = s.instance.api_key or ""
+                masked = (key[:4] + "****") if len(key) > 8 else bool(key)
+                providers[name] = {
+                    "type": getattr(s.instance, "provider_type", "unknown"),
+                    "model": s.instance.model,
+                    "weight": s.weight,
+                    "api_key": masked,
+                    "available": s.available(now),
+                    "disabled": s.disabled,
+                    "cooldown_remaining": round(max(0.0, s.cooldown_until - now), 1),
+                    "successes": s.successes,
+                    "failures": s.failures,
+                    "mean_latency": round(s.mean_latency(), 3) if s.latencies else None,
+                    "last_error": s.last_error,
+                }
+            return {
+                "config_file": self._config_file,
+                "settings": {
+                    "strategy": strategy,
+                    "timeout": self._settings.get("timeout", 20),
+                    "retry_on_failure": self._settings.get("retry_on_failure", True),
+                },
+                "providers": providers,
+            }

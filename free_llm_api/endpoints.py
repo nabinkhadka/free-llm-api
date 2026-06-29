@@ -53,6 +53,15 @@ def stats() -> Dict[str, Any]:
     return _get_manager().stats()
 
 
+def status() -> Dict[str, Any]:
+    """Return a comprehensive config + runtime snapshot.
+
+    Includes settings, config path, and per-provider details (model,
+    weight, masked API key, type, availability, health).
+    """
+    return _get_manager().status()
+
+
 def stream_generate(prompt: str, **kwargs: Any) -> Generator[Dict[str, Any], None, None]:
     """Stream a response from a free provider with automatic failover.
 

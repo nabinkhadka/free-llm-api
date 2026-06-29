@@ -30,6 +30,9 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 #: Convenience aliases.
 generate = endpoints.generate
 stream_generate = endpoints.stream_generate
+status = endpoints.status
+stats = endpoints.stats
+reload = endpoints.reload
 
 __version__ = "0.2.0"
 

@@ -118,7 +118,7 @@ python tests/test_wrapper.py   # offline tests (no keys / network needed)
 ## Usage
 
 ```python
-from free_llm_api import endpoints
+from free_llm_api import endpoints, status
 
 # basic
 r = endpoints.generate("Write a haiku about the sea")
@@ -132,8 +132,11 @@ r = endpoints.generate(
     temperature=0.4,
 )
 
-# inspect live health / latency
-import json; print(json.dumps(endpoints.stats(), indent=2))
+# inspect config + live health
+import json; print(json.dumps(endpoints.status(), indent=2))
+
+# or just runtime stats (lighter)
+print(json.dumps(endpoints.stats(), indent=2))
 
 # force a reload (also happens automatically when config.yaml changes)
 endpoints.reload()
