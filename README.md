@@ -1,9 +1,8 @@
-# free-llm-api 
+# free-llm-api
 
-A lightweight, **OpenRouter-style router for FREE LLM APIs**. It rotates across
-multiple free providers, fails over the instant one errors out, respects rate
-limits with cooldowns, and is driven entirely by a `config.yaml` you can edit
-while it runs.
+Many LLM providers offer free API access, but each one has its own rate limits, and they run out or go down at different times. This project solves that problem. It lets you send one request and have it automatically routed to whichever free provider is available. If a provider fails or hits its rate limit, the request moves to the next one, so your app keeps working without extra code on your end.
+
+You just call one simple function, and the library handles the rest: picking a provider, retrying on failure, and balancing load across all the providers you've configured.
 
 ```python
 from free_llm_api import endpoints
@@ -12,35 +11,19 @@ response = endpoints.generate("Explain quantum computing")
 print(response["text"])
 ```
 
-Built for **resilience, simplicity, and easy extensibility** on top of
-unreliable free tiers. Providers come from
-[awesome-free-llm-apis](https://github.com/mnfst/awesome-free-llm-apis).
-
----
-
 ## Features
 
-| Requirement | How it's met |
-|---|---|
-| Config-driven | Every provider lives in `config.yaml`; keys via `${ENV_VAR}` |
-| Plugin providers | `@register("name")` + auto-discovery — **no core edits to add one** |
-| Scheduling | Smooth **weighted round-robin** (nginx algorithm), or `fastest` |
-| Failover | Any error (timeout / HTTP / 429) → immediately try next provider |
-| Smart failures | 429 → cooldown (honours `Retry-After`); 401/403 → disable; timeout → retry later |
-| Cooldown system | Per-provider "skip until" with linear backoff on repeated failures |
-| Hot reload | Edits to `config.yaml` are picked up automatically — new keys work at once |
-| Bonus | Per-provider latency tracking, `fastest` strategy |
+- **Config-driven** — every provider lives in `config.yaml`, keys via `${ENV_VAR}`
+- **Failover & load balancing** — any error (timeout, HTTP, 429) moves to the next provider, weighted round-robin by default
+- **Hot reload** — edit `config.yaml` while it's running, changes pick up automatically
+- **Plugin providers** — add a new one with `@register("name")`, no core edits needed
 
-### Included free providers
+## Included free providers
 
-`groq` · `openrouter` (`:free`) · `nvidia` · `mistral` · `zai` (Zhipu GLM) ·
-`cerebras` · `llm7` (key-less) · `gemini` (Google AI Studio)
+`groq` · `openrouter` (`:free`) · `nvidia` · `mistral` · `zai` (Zhipu GLM) · `cerebras` · `llm7` (key-less) · `gemini` (Google AI Studio)
 
-All are OpenAI-compatible, so they share **one** generic `type: openai`
-implementation and differ only by `base_url` in config — adding another such
-provider needs zero code.
-
----
+Provider list comes from
+[awesome-free-llm-apis](https://github.com/mnfst/awesome-free-llm-apis).
 
 ## Install
 
@@ -52,15 +35,20 @@ pip install -e .
 
 Requires Python 3.9+.
 
+Check it works:
+
+```bash
+python tests/example.py          # end-to-end demo + provider stats
+python tests/test_wrapper.py     # offline tests (no keys / network needed)
+```
+
 ## Configure
 
-Edit `free_llm_api/config.yaml` (or point `$FREE_LLM_API_CONFIG` at your own),
-then set keys for the providers you want. You can use a `.env` file (easiest)
-or export them as environment variables. Get free keys at:
+Edit `free_llm_api/config.yaml` (or point `$FREE_LLM_API_CONFIG` at your own), then set keys for the providers you want to use. Use a `.env` file (easiest) or export them as environment variables. Get free keys at:
 
 | Provider | Key env var | Sign-up |
 |---|---|---|
-| Groq ⭐ | `GROQ_API_KEY` | https://console.groq.com/keys |
+| Groq | `GROQ_API_KEY` | https://console.groq.com/keys |
 | Gemini (AI Studio) | `GEMINI_API_KEY` | https://aistudio.google.com/apikey |
 | Cerebras | `CEREBRAS_API_KEY` | https://cloud.cerebras.ai |
 | OpenRouter | `OPENROUTER_API_KEY` | https://openrouter.ai/keys |
@@ -80,57 +68,22 @@ export OPENROUTER_API_KEY=sk-or-...
 # providers whose key is empty are skipped automatically — you don't need all of them
 ```
 
-**Variable priority:** OS environment variables > `.env` file > YAML defaults
-(`${VAR:-default}`). An existing OS env var always wins over `.env`.
+How keys are loaded (in order of priority): if a key is set as an OS environment variable,that's used first. Otherwise, the library checks your `.env` file. If neither is set, it falls back to the default in `config.yaml` (written as `${VAR:-default}`).
 
-### Override model & weight per provider
-
-Every provider's `model` and `weight` can be overridden at runtime via
-environment variables — no config file edits needed:
-
-```bash
-# Override model only
-GROQ_MODEL=llama-4 python3 tests/example.py
-
-# Override model + weight
-GROQ_MODEL=llama-4 GROQ_WEIGHT=20 python3 tests/example.py
-
-# Override multiple providers
-GROQ_WEIGHT=30 GEMINI_WEIGHT=1 python3 tests/example.py
-```
-
-The env var name follows the pattern `{NAME}_MODEL` / `{NAME}_WEIGHT`,
-where `NAME` is the uppercase provider name from `config.yaml`.
-If unset, the built-in default from `config.yaml` is used.
-
-Config resolution order: explicit path → `$FREE_LLM_API_CONFIG` → `./config.yaml`
-→ the packaged default.
-
-## Run
-
-```bash
-python tests/example.py          # end-to-end demo + provider stats
-python tests/test_wrapper.py   # offline tests (no keys / network needed)
-```
-
----
+Free-tier models change often, and providers sometimes retire old model IDs. If you get a 404 error, it likely means the model ID has changed. Just open `config.yaml`, update the model name, and save — no restart needed.
 
 ## Usage
 
 ```python
 from free_llm_api import endpoints, status
 
-# basic
-r = endpoints.generate("Write a haiku about the sea")
-print(r["text"], "via", r["provider"])
-
-# generation params are passed straight through to the chosen provider
 r = endpoints.generate(
     "Summarise the French Revolution",
     system="You are a concise historian.",
     max_tokens=300,
     temperature=0.4,
 )
+print(r["text"], "via", r["provider"])
 
 # inspect config + live health
 import json; print(json.dumps(endpoints.status(), indent=2))
@@ -155,73 +108,8 @@ Every response is normalized:
 }
 ```
 
-If **every** provider fails, `AllProvidersFailedError` is raised with a
-per-provider error map.
+If every provider fails, `AllProvidersFailedError` is raised with a per-provider error map.
 
 ---
 
-## Add a new provider
-
-**If it's OpenAI-compatible (most are): no code at all.** Just add a config
-block pointing the generic `openai` type at its base URL:
-
-```yaml
-  - name: deepinfra
-    type: openai
-    enabled: true
-    api_key: "${DEEPINFRA_API_KEY}"
-    model: "meta-llama/Meta-Llama-3.1-8B-Instruct"
-    weight: 5
-    extra:
-      base_url: "https://api.deepinfra.com/v1/openai"
-      # headers: { ... }     # optional extra headers
-      # params:  { ... }     # optional extra body params
-  # requires_key: false      # for key-less gateways
-```
-
-**If its API isn't OpenAI-shaped:** drop a `*_provider.py` file that subclasses
-`BaseProvider`, implements `generate()` to return `{"text", "provider",
-"model"}`, and raises a `ProviderError` subclass on failure. Register it with
-`@register("yourname")` and reference it via `type: yourname`. It's
-auto-discovered on import — the manager and scheduler never need to know it
-exists.
-
----
-
-## How it behaves on failure
-
-| Situation | Reaction |
-|---|---|
-| Timeout / connection error | `ProviderTimeoutError` → cool down ~15s, try next |
-| HTTP 429 | `RateLimitError` → cool down ≥60s (or `Retry-After`), try next |
-| HTTP 401 / 403 | `InvalidKeyError` → **disable** provider until next reload |
-| HTTP 5xx / bad body | `ProviderError` → cool down ~10s, try next |
-| Repeated failures | cooldown scales linearly (×2, ×3 … capped ×5) |
-| All providers exhausted | raise `AllProvidersFailedError` |
-
-Cooldowns are cleared on the next successful call. Editing `config.yaml` (e.g.
-fixing a key) gives a previously disabled provider a fresh chance.
-
----
-
-## Project layout
-
-```
-free_llm_api/
-├── config.yaml            # all providers + settings
-├── endpoints.py           # public API: generate / stats / reload / configure
-├── manager.py             # load, schedule, fail over, health tracking
-├── scheduler.py           # weighted round-robin (+ fastest)
-├── errors.py              # exception hierarchy with failure-handling hints
-├── providers/
-│   ├── base.py            # BaseProvider + OpenAICompatibleProvider
-│   ├── registry.py        # @register plugin registry
-│   └── openai_provider.py # ONE generic type for all OpenAI-compatible APIs
-└── utils/
-    └── config_loader.py   # YAML + ${ENV} expansion + mtime for hot reload
-```
-
-## Notes
-
-* Only free tiers are configured. For OpenRouter, keep the `:free` model suffix.
-* Model IDs drift on free tiers — if one 404s, swap it in `config.yaml` (no restart needed).
+More on scheduling, adding providers, failure handling, and project layout: [docs/ADVANCED.md](docs/ADVANCED.md).
